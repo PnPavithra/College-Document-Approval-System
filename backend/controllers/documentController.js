@@ -34,14 +34,35 @@ const approveDocument = async (req, res) => {
   const { approved, rejected, comment } = req.body;
   const role = req.user.role;
   const roleKey = roleKeyMap[role];
+  const userId = req.user.userId;
 
   if (!roleKey) {
     return res.status(403).json({ msg: "Unauthorized role" });
   }
 
   try {
-    const doc = await Document.findById(documentId);
+    const doc = await Document.findById(documentId).populate("submittedBy");
     if (!doc) return res.status(404).json({ msg: "Document not found" });
+
+    // Authorization checks
+    if (role === "Guide") {
+      const assignedGuide = doc.submittedBy.guide?.toString();
+      if (assignedGuide !== userId) {
+        return res.status(403).json({ msg: "You are not the assigned guide for this student" });
+      }
+    }
+
+    if (role === "Panel Coordinator") {
+      if (!doc.status.guide.approved) {
+        return res.status(403).json({ msg: "Guide must approve before Panel Coordinator" });
+      }
+    }
+
+    if (role === "Panel") {
+      if (!doc.status.guide.approved || !doc.status.panelCoordinator.approved) {
+        return res.status(403).json({ msg: "Panel Coordinator must approve before Panel" });
+      }
+    }
 
     // Update role-specific status
     const statusUpdate = {
@@ -52,7 +73,7 @@ const approveDocument = async (req, res) => {
 
     doc.status[roleKey] = statusUpdate;
 
-    // ✅ Add to logs
+    // Add to logs
     doc.logs.push({
       role: role,
       userId: req.user.userId,
