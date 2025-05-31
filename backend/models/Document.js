@@ -22,7 +22,8 @@ const documentSchema = new mongoose.Schema({
     panel: {
       approved: { type: Boolean, default: false },
       rejected: { type: Boolean, default: false },
-      comment: { type: String, default: "" }
+      comment: { type: String, default: "" },
+      marks: { type: Number, default: null}
     }
   },
   finalStatus: { type: String, enum: ["Pending", "Approved", "Rejected"], default: "Pending" },

@@ -113,7 +113,7 @@ const approveDocument = async (req, res) => {
   };
 
   const { documentId } = req.params;
-  const { approved, rejected, comment } = req.body;
+  const { approved, rejected, comment, marks } = req.body;
   const role = req.user.role;
   const roleKey = roleKeyMap[role];
   const userId = req.user.userId;
@@ -132,7 +132,7 @@ const approveDocument = async (req, res) => {
     // Get all active docs for the student's current batch (active = "true" or "temp")
     const batchDocs = await Document.find({ submittedBy, active: { $in: ["true", "temp"] } });
 
-    // *** NEW: Block approval flow if any temp docs exist in batch ***
+    // *** Block approval flow if any temp docs exist in batch ***
     const hasTempDoc = batchDocs.some(d => d.active === "temp");
     if (hasTempDoc) {
       return res.status(403).json({
@@ -163,7 +163,7 @@ const approveDocument = async (req, res) => {
       const currentRoleIndex = roleOrder.indexOf(roleKey);
       const rejectRoleIndex = roleOrder.indexOf(rejectingRole);
 
-      // Rule 1: Current role cannot review if previous rejection role has not approved all docs
+      //Current role cannot review if previous rejection role has not approved all docs
       if (rejectingRole && currentRoleIndex > rejectRoleIndex) {
         const allApprovedByRejectRole = trueBatchDocs.every(doc => doc.status[rejectingRole].approved);
         if (!allApprovedByRejectRole) {
@@ -173,7 +173,7 @@ const approveDocument = async (req, res) => {
         }
       }
 
-      // Rule 2: Prevent role from going beyond previous max approval until batch catches up
+      //Prevent role from going beyond previous max approval until batch catches up
       const previousApprovedDocs = await Document.find({
         submittedBy,
         version: lastRejectedVersion,
@@ -232,7 +232,17 @@ const approveDocument = async (req, res) => {
       if (previousPending) {
         return res.status(403).json({ msg: "Previous approvals incomplete for pending documents" });
       }
+
+      //panel: validate marks if approving
+      if (approved) {
+        if (typeof marks !== "number" || isNaN(marks)) {
+          return res.status(400).json({ msg: "Panel must provide numeric marks when approving." });
+        }
+        if (marks < 0 || marks > 100) {
+          return res.status(400).json({ msg: "Marks must be between 0 and 100." });
+        }
     }
+  }
 
     // Update status for current doc
     const statusUpdate = {
@@ -241,14 +251,26 @@ const approveDocument = async (req, res) => {
       comment: comment || ""
     };
 
+    if (role === "Panel" && approved) {
+      statusUpdate.marks = marks;
+    }
+
     doc.status[roleKey] = statusUpdate;
-    doc.logs.push({
+
+    const logEntry = {
       actionBy: userId,
       role,
       action: statusUpdate.approved ? "Approved" : "Rejected",
       comment: statusUpdate.comment,
       timestamp: new Date()
-    });
+    };
+
+    if (role === "Panel" && approved && marks !== undefined) {
+      logEntry.marks = marks;
+    }
+
+    doc.logs.push(logEntry);
+
 
     // Update finalStatus based on role approvals
     if (doc.status.guide.approved && doc.status.panelCoordinator.approved && doc.status.panel.approved) {
@@ -359,11 +381,44 @@ const getPendingDocumentsForApprover = async (req, res) => {
   }
 };
 
+const getPanelMarksByStudent = async (req, res) => {
+  const { studentId } = req.params;
+
+  try {
+    const student = await User.findById(studentId);
+    if (!student || student.role !== "Student") {
+      return res.status(404).json({ msg: "Student not found" });
+    }
+
+    const documents = await Document.find({
+      submittedBy: studentId,
+      finalStatus: "Approved", // Only approved documents
+      'status.panel.marks': { $exists: true }
+    });
+
+    const marksData = documents.map((doc) => ({
+      title: doc.title,
+      version: doc.version,
+      marks: doc.status.panel.marks
+    }));
+
+    return res.status(200).json({
+      student: student.name,
+      studentId,
+      marks: marksData
+    });
+  } catch (error) {
+    console.error("Error fetching panel marks:", error);
+    res.status(500).json({ msg: "Server Error" });
+  }
+};
+
 module.exports = {
   submitDocument,
   approveDocument,
   getStudentDocuments,
-  getPendingDocumentsForApprover
+  getPendingDocumentsForApprover,
+  getPanelMarksByStudent
 };
 
 

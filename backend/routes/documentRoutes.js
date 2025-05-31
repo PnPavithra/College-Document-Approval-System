@@ -8,6 +8,7 @@ const {
   approveDocument,
   getStudentDocuments,
   getPendingDocumentsForApprover,
+  getPanelMarksByStudent
 } = require("../controllers/documentController");
 
 // ✅ Student submits a document
@@ -42,4 +43,11 @@ router.get(
   getPendingDocumentsForApprover
 );
 
+// ✅ to get documents marked by the panel
+router.get(
+  "/panel-marks/:studentId",
+  protect,
+  authorizeRoles("Guide", "Panel Coordinator", "Panel"), // adjust roles as needed
+  getPanelMarksByStudent
+);
 module.exports = router;
