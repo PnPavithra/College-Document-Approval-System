@@ -4,6 +4,10 @@ const documentSchema = new mongoose.Schema({
   title: { type: String, required: true },
   fileUrl: { type: String }, // You can extend this to file uploads
   submittedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  version: {
+    type: Number,
+    default: 1
+  },
   status: {
     guide: {
       approved: { type: Boolean, default: false },
@@ -31,7 +35,13 @@ logs: [
       comment: { type: String },
       timestamp: { type: Date, default: Date.now }
     }
-  ]
+  ],
+  active: {
+    type: String,
+    enum: ["true", "temp", "false"],
+    default: "true",
+    required: true
+  }
 },
 {
   timestamps: true
