@@ -42,7 +42,7 @@ const documentSchema = new mongoose.Schema({
 
 logs: [
     {
-      actionBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+      actionBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User'},
       role: { type: String },
       //reviewdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
       action: { type: String, enum: ["Approved", "Rejected"] },
