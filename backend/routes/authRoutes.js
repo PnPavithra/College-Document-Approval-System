@@ -3,6 +3,9 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
+// Import the loginCounter from prometheusMetrics
+const { loginCounter, activeUsersGauge } = require("../middleware/prometheusMetrics");
+
 const router = express.Router();
 
 // Register Route
@@ -50,25 +53,32 @@ router.post("/register", async (req, res) => {
   }
 });
 
-// Login Route - Now includes role verification
+// Login Route - Now includes role verification and Prometheus login metrics
 router.post("/login", async (req, res) => {
   const { role, name, password } = req.body;
 
   try {
     const user = await User.findOne({ name });
     if (!user) {
+      loginCounter.labels('failure').inc();  // increment failure count
       return res.status(400).json({ msg: "Invalid credentials" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
+      loginCounter.labels('failure').inc();  // increment failure count
       return res.status(400).json({ msg: "Invalid credentials" });
     }
 
     if (user.role !== role) {
+      loginCounter.labels('failure').inc();  // increment failure count
       return res.status(400).json({ msg: "Role does not match" });
     }
 
+    // If all checks pass, increment success count
+    loginCounter.labels('success').inc();
+    activeUsersGauge.inc();
+    
     const token = jwt.sign(
       { userId: user._id, role: user.role },
       process.env.JWT_SECRET,
