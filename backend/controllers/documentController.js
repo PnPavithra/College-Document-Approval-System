@@ -1,5 +1,7 @@
 const Document = require("../models/Document");
 const User = require("../models/User");
+const { notifyNextRole } = require("../controllers/emailController");
+
 
 // 📄 Submit or Resubmit Documents
 const submitDocument = async (req, res) => {
@@ -99,10 +101,12 @@ const submitDocument = async (req, res) => {
   }
 
   await Document.insertMany(docsToSave);
+
+  //Trigger notification to Guide after submission
+  const firstDoc = docsToSave[0]; // Just pick the first for email context
+  await notifyNextRole(firstDoc, "Student", { approved: true });
   return res.status(201).json({ msg: `Submitted docs as version ${version}`, documents: docsToSave });
 };
-
-
 
 // Approval function
 const approveDocument = async (req, res) => {
@@ -283,6 +287,29 @@ const approveDocument = async (req, res) => {
     }
 
     await doc.save();
+
+    try {
+    // Try sending the email
+      await notifyNextRole(doc, role, statusUpdate);
+
+      return res.status(200).json({
+        msg: "Document reviewed successfully",
+        status: doc.status,
+      });
+    } catch (err) {
+      console.error('Approve doc error:', err);
+
+      // Only send response if headers were not already sent
+      if (!res.headersSent) {
+        return res.status(500).json({
+          msg: "Document reviewed but failed to send email",
+          error: err.message,
+        });
+      }
+    }
+
+
+
 
     // After saving, check if all batch docs are approved or if any rejected remain
     const updatedBatchDocs = await Document.find({ submittedBy, active: "true" });

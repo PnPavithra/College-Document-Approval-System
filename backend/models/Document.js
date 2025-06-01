@@ -12,26 +12,39 @@ const documentSchema = new mongoose.Schema({
     guide: {
       approved: { type: Boolean, default: false },
       rejected: { type: Boolean, default: false },
-      comment: { type: String, default: "" }
+      comment: { type: String, default: "" },
+      reviewedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+      }
     },
     panelCoordinator: {
       approved: { type: Boolean, default: false },
       rejected: { type: Boolean, default: false },
-      comment: { type: String, default: "" }
+      comment: { type: String, default: "" },
+      reviewedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+      }
     },
     panel: {
       approved: { type: Boolean, default: false },
       rejected: { type: Boolean, default: false },
       comment: { type: String, default: "" },
-      marks: { type: Number, default: null}
+      marks: { type: Number, default: null},
+      reviewedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+      }
     }
   },
   finalStatus: { type: String, enum: ["Pending", "Approved", "Rejected"], default: "Pending" },
 
 logs: [
     {
+      actionBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
       role: { type: String },
-      userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      //reviewdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
       action: { type: String, enum: ["Approved", "Rejected"] },
       comment: { type: String },
       timestamp: { type: Date, default: Date.now }
