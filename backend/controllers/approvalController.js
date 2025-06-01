@@ -1,6 +1,6 @@
 const Approval = require('../models/Approval');
 const Document = require('../models/Document');
-const User = require('../models/User'); // Assuming you have a User model
+const User = require('../models/User'); 
 
 exports.approveDocument = async (req, res) => {
   const { documentId, remarks, status } = req.body;
@@ -40,7 +40,7 @@ exports.approveDocument = async (req, res) => {
   doc.approvals.push(approval._id);
 
   // Optional: update document status field
-  doc.status = status === 'approved' ? 'under_review' : 'rejected';
+  doc.status = status === 'Approved' ? 'Pending' : 'Rejected';
 
   await doc.save();
 
