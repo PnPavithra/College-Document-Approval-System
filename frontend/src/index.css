@@ -1,0 +1,117 @@
+/* ======== Global Reset & Box Model ======== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ======== Body & Typography ======== */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #11151c;
+  color: #f1e0c5;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ======== Container Utility ======== */
+.container {
+  max-width: 960px;
+  margin: 2rem auto;
+  padding: 1rem;
+}
+
+/* ======== Headings ======== */
+h1, h2, h3, h4, h5 {
+  color: #ffffff;
+  margin-bottom: 1rem;
+}
+
+/* ======== Links ======== */
+a {
+  color: #4db8ff;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+/* ======== Buttons ======== */
+button {
+  background-color: #364156;
+  color: #f1e0c5;
+  border: 1px solid #58677d;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  
+}
+
+button:hover {
+  background-color: #4b5a72;
+}
+
+/* ======== Inputs & Textareas ======== */
+input,
+textarea,
+select {
+  width: 100%;
+  padding: 0.6rem;
+  margin: 0.5rem 0;
+  background-color: #1d222a;
+  color: #f1e0c5;
+  border: 1px solid #3a3f47;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: #4db8ff;
+  box-shadow: 0 0 0 2px rgba(77, 184, 255, 0.2);
+}
+
+/* ======== Card Component Style ======== */
+.card {
+  background-color: #1c2029;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  margin: 1rem 0;
+}
+
+/* ======== Utility Classes ======== */
+.text-center {
+  text-align: center;
+}
+.text-right {
+  text-align: right;
+}
+
+/* ======== Scrollbar Styling ======== */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+::-webkit-scrollbar-thumb {
+  background: #4b5a72;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #58677d;
+}
+
+.button-row {
+  display: flex;
+  justify-content: space-between; /* Push buttons to opposite ends */
+  align-items: center;
+  margin-top: 1rem;
+  padding-bottom: 10px; /* Optional: Add some horizontal padding */
+}
+

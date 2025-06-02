@@ -93,7 +93,7 @@ const submitDocument = async (req, res) => {
     }));
 
     // Mark old rejected doc as inactive
-    await Document.findByIdAndUpdate(matchingOldDoc._id, { active: false });
+    await Document.updateOne({ _id: matchingOldDoc._id }, { active: "false" });
   }
 
   if (docsToSave.length === 0) {

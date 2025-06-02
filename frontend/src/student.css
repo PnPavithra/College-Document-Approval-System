@@ -1,0 +1,27 @@
+.student-dashboard h2 {
+margin-bottom: 1rem;
+}
+
+.student-dashboard .card {
+background: #fff;
+}
+
+.student-dashboard a {
+color: #007bff;
+}
+
+✅ guide.css
+
+/* guide.css */
+.guide-dashboard h2 {
+margin-bottom: 1rem;
+}
+
+.guide-dashboard .card {
+border-left: 4px solid #007bff;
+}
+
+.guide-dashboard input,
+.guide-dashboard button {
+margin-top: 0.5rem;
+}
