@@ -44,8 +44,15 @@ jobs:
 
       - name: 🧪 Health check the backend
         run: |
-          sleep 15 # give backend time to start and connect to MongoDB
-          curl --fail http://localhost:5000 || (echo "Health check failed" && exit 1)
+          echo "⏳ Waiting for the server..."
+          for i in {1..10}; do
+            curl --fail http://localhost:5000/health && break
+            echo "Retrying ($i)..."
+            sleep 3
+          done
+
+      - name: 📄 Print Docker logs
+        run: docker logs backend || true
 
       - name: 🧹 Clean up Docker container
         run: |

@@ -4,7 +4,7 @@
 FROM node:18
 
 # 2. Set working directory
-WORKDIR /usr/src/app
+WORKDIR /app
 
 # 3. Copy package files and install dependencies
 COPY package*.json ./
