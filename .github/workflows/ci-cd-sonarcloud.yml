@@ -39,11 +39,15 @@ jobs:
         working-directory: ./backend
         env:
             MONGO_URL: mongodb://localhost:27017/testdb
-        run: npm test || true
+        run: npm test
 
       - name: 📦 Install frontend dependencies
         working-directory: ./frontend
         run: npm install
+
+      - name: 🧪 Run frontend tests
+        working-directory: ./frontend
+        run: npm test
 
       - name: 🏗️ Build frontend
         working-directory: ./frontend
