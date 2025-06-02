@@ -8,10 +8,11 @@ const {
   approveDocument,
   getStudentDocuments,
   getPendingDocumentsForApprover,
-  getPanelMarksByStudent
+  getPanelMarksByStudent,
+  deleteDocument
 } = require("../controllers/documentController");
 
-// ✅ Student submits a document
+// Student submits a document
 router.post(
   "/submit",
   protect,
@@ -19,7 +20,7 @@ router.post(
   submitDocument
 );
 
-// ✅ Approvers (Guide, Panel_Coordinator, Panel) update approval status
+// Approvers (Guide, Panel_Coordinator, Panel) update approval status
 router.put(
   "/approve/:documentId",
   protect,
@@ -27,7 +28,7 @@ router.put(
   approveDocument
 );
 
-// ✅ Student checks their submitted documents
+// Student checks their submitted documents
 router.get(
   "/my-documents",
   protect,
@@ -35,7 +36,7 @@ router.get(
   getStudentDocuments
 );
 
-// ✅ For approvers to fetch pending documents for them
+// For approvers to fetch pending documents for them
 router.get(
   "/pending",
   protect,
@@ -43,11 +44,19 @@ router.get(
   getPendingDocumentsForApprover
 );
 
-// ✅ to get documents marked by the panel
+// to get documents marked by the panel
 router.get(
   "/panel-marks/:studentId",
   protect,
   authorizeRoles("Guide", "Panel Coordinator", "Panel"), // adjust roles as needed
   getPanelMarksByStudent
+);
+
+// Student deletes their own document if not reviewed
+router.delete(
+  "/delete/:id",
+  protect,
+  authorizeRoles("Student"),
+  deleteDocument
 );
 module.exports = router;

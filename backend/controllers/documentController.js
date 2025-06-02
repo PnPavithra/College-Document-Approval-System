@@ -333,8 +333,6 @@ const approveDocument = async (req, res) => {
   }
 };
 
-
-
 // Student's Own Docs
 const getStudentDocuments = async (req, res) => {
   try {
@@ -440,12 +438,54 @@ const getPanelMarksByStudent = async (req, res) => {
   }
 };
 
+// Delete document (only if student owns it and guide has not reviewed)
+const deleteDocument = async (req, res, next) => {
+  try {
+    const documentId = req.params.id;
+
+    // Find the document by ID
+    const doc = await Document.findById(documentId);
+
+    if (!doc) {
+      return res.status(404).json({ message: "Document not found" });
+    }
+
+    // submittedBy can be an ObjectId; convert to string for comparison
+    const submittedById = doc.submittedBy?.toString();
+    const currentUserId = req.user?.userId;
+
+    if (!currentUserId) {
+      return res.status(401).json({ message: "User not authenticated" });
+    }
+
+    // Check if guide status exists safely
+    const guideStatus = doc.status?.guide;
+    const guideHasReviewed = guideStatus?.approved || guideStatus?.rejected;
+
+    // Authorization check: only owner can delete & only if guide has not reviewed
+    if (submittedById !== currentUserId || guideHasReviewed) {
+      return res.status(403).json({ message: "You are not allowed to delete this document" });
+    }
+
+    // Delete the document
+    await Document.findByIdAndDelete(documentId);
+
+    res.status(200).json({ message: "Document deleted successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+
+
 module.exports = {
   submitDocument,
   approveDocument,
   getStudentDocuments,
   getPendingDocumentsForApprover,
-  getPanelMarksByStudent
+  getPanelMarksByStudent,
+  deleteDocument
 };
 
 
