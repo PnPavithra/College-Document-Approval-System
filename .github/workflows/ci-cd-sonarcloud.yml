@@ -63,10 +63,13 @@ jobs:
         uses: SonarSource/sonarcloud-github-action@v2
         with:
             projectBaseDir: .
-            projectKey: ${{ secrets.SONAR_PROJECT_KEY }}
-            organization: ${{ secrets.SONAR_ORGANIZATION }}
+            args: >
+              -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
+              -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
+
         env:
-            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
 
 
   docker-build-and-push:
