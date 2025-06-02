@@ -16,6 +16,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+//to check
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
+
 // Use the custom Prometheus middleware to track metrics on all routes
 app.use(metricsMiddleware);
 
