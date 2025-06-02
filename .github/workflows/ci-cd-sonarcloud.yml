@@ -63,7 +63,7 @@ jobs:
         uses: SonarSource/sonarcloud-github-action@v2
         with:
             projectBaseDir: .
-            args: "-Dsonar.projectKey=nihamo -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}"
+            args: "-Dsonar.projectKey=Nihamo_College-Document-Approval-System -Dsonar.organization=nihamo"
 
 
         env:
