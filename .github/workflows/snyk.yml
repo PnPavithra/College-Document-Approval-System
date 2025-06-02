@@ -1,0 +1,39 @@
+name: Snyk Security Scan
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+
+jobs:
+  snyk:
+    name: Snyk Test for Frontend and Backend
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Snyk
+        run: npm install -g snyk
+
+      - name: Snyk Auth
+        run: snyk auth ${{ secrets.SNYK_TOKEN }}
+
+      - name: Test Backend
+        working-directory: ./backend
+        run: |
+          npm install
+          snyk test
+
+      - name: Test Frontend
+        working-directory: ./frontend
+        run: |
+          npm install
+          snyk test
