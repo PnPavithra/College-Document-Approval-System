@@ -41,7 +41,6 @@ jobs:
             MONGO_URL: mongodb://localhost:27017/testdb
         run: npm test || true
 
-
       - name: 📦 Install frontend dependencies
         working-directory: ./frontend
         run: npm install
@@ -62,35 +61,67 @@ jobs:
       - name: 🔍 Run SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
         with:
-            projectBaseDir: .
-            args: "-Dsonar.projectKey=Nihamo_College-Document-Approval-System -Dsonar.organization=nihamo"
-
-
+          projectBaseDir: .
+          args: "-Dsonar.projectKey=Nihamo_College-Document-Approval-System -Dsonar.organization=nihamo"
         env:
-           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-  docker-build-and-push:
-    name: Build & Push Docker Images
+  snyk:
+    name: 🛡️ Snyk Security Scan
     runs-on: ubuntu-latest
-    needs: [build-and-test, sonarcloud]
+    needs: build-and-test
 
     steps:
-      - name: Checkout code
+      - name: 📥 Checkout code
         uses: actions/checkout@v4
 
-      - name: Log in to Docker Hub
+      - name: 🧰 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: 🔐 Install Snyk
+        run: npm install -g snyk
+
+      - name: 🔐 Authenticate Snyk
+        run: snyk auth ${{ secrets.SNYK_TOKEN }}
+
+      - name: 🔎 Snyk Test Backend
+        working-directory: ./backend
+        run: |
+          npm install
+          snyk test
+          snyk monitor
+
+      - name: 🔎 Snyk Test Frontend
+        working-directory: ./frontend
+        run: |
+          npm install
+          snyk test
+          snyk monitor
+
+  docker-build-and-push:
+    name: 🐳 Build & Push Docker Images
+    runs-on: ubuntu-latest
+    needs: [build-and-test, sonarcloud, snyk]
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔐 Log in to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      - name: Build Backend Docker image
+      - name: 🛠️ Build Backend Docker image
         working-directory: ./backend
         run: docker build -t ${{ secrets.DOCKER_USERNAME }}/crassist-backend:latest .
 
-      - name: Push Backend Docker image
+      - name: 🚀 Push Backend Docker image
         run: docker push ${{ secrets.DOCKER_USERNAME }}/crassist-backend:latest
 
-      - name: Build Frontend Docker image
+      - name: 🛠️ Build Frontend Docker image
         working-directory: ./frontend
         run: docker build -t ${{ secrets.DOCKER_USERNAME }}/crassist-frontend:latest .
 
-      - name: Push Frontend Docker image
+      - name: 🚀 Push Frontend Docker image
         run: docker push ${{ secrets.DOCKER_USERNAME }}/crassist-frontend:latest
