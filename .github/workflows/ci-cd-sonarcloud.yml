@@ -9,7 +9,7 @@ on:
 
 jobs:
   build-and-test:
-    name: 🧪 Build and Test
+    name: 🧪 Build
     runs-on: ubuntu-latest
 
     services:
@@ -63,7 +63,7 @@ jobs:
         uses: SonarSource/sonarcloud-github-action@v2
         with:
             projectBaseDir: .
-            args: "-Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }} -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}"
+            args: "-Dsonar.projectKey=nihamo -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}"
 
 
         env:
