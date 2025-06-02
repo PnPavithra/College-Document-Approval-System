@@ -32,21 +32,21 @@ jobs:
           node-version: 20
 
       - name: 📦 Install backend dependencies
-        working-directory: ./server
+        working-directory: ./backend
         run: npm install
 
       - name: 🧪 Run backend tests
-        working-directory: ./server
+        working-directory: ./backend
         env:
           MONGO_URL: mongodb://localhost:27017/testdb
         run: npm test
 
       - name: 📦 Install frontend dependencies
-        working-directory: ./client
+        working-directory: ./frontend
         run: npm install
 
       - name: 🏗️ Build frontend
-        working-directory: ./client
+        working-directory: ./frontend
         run: npm run build
 
   sonarcloud:
