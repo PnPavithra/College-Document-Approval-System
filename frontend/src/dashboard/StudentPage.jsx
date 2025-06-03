@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
-import { submitDocument, getMyDocuments } from "../api/documents";
-import { FaPlus } from "react-icons/fa";
+import {
+  submitDocument,
+  getMyDocuments,
+  deleteDocument,
+} from "../api/documents";
+import { FaPlus, FaTrash } from "react-icons/fa";
 
 const StudentPage = () => {
   const [docs, setDocs] = useState([]);
@@ -28,24 +32,36 @@ const StudentPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const filteredDocs = formFields.filter(doc => doc.title && doc.fileUrl);
+    const filteredDocs = formFields.filter(
+      (doc) => doc.title && doc.fileUrl
+    );
     if (filteredDocs.length === 0) {
       alert("Please fill in at least one document.");
       return;
     }
 
     try {
-      await submitDocument(filteredDocs); // ✅ Send as array
+      await submitDocument(filteredDocs);
       fetchDocs();
-      setFormFields([{ title: "", fileUrl: "" }]); // reset form
+      setFormFields([{ title: "", fileUrl: "" }]);
     } catch (err) {
       alert(err.response?.data?.msg || "Submission failed");
     }
   };
 
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this document?")) return;
+    try {
+      await deleteDocument(id);
+      fetchDocs();
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to delete document");
+    }
+  };
+
   const getStatusText = (status) => {
-    if (status.approved) return "✅ Approved";
-    if (status.rejected) return "❌ Rejected";
+    if (status?.approved) return "✅ Approved";
+    if (status?.rejected) return "❌ Rejected";
     return "⏳ Pending";
   };
 
@@ -66,27 +82,34 @@ const StudentPage = () => {
               type="text"
               placeholder="Document Title"
               value={field.title}
-              onChange={(e) => handleChange(index, "title", e.target.value)}
+              onChange={(e) =>
+                handleChange(index, "title", e.target.value)
+              }
               required
             />
             <input
               type="text"
               placeholder="Document Link"
               value={field.fileUrl}
-              onChange={(e) => handleChange(index, "fileUrl", e.target.value)}
+              onChange={(e) =>
+                handleChange(index, "fileUrl", e.target.value)
+              }
               required
             />
           </div>
         ))}
 
         <div className="button-row">
-          <button type="button" onClick={handleAddField} className="add-btn">
-      <FaPlus /> Add Another
-    </button>
+          <button
+            type="button"
+            onClick={handleAddField}
+            className="add-btn"
+          >
+            <FaPlus /> Add Another
+          </button>
 
-    <button type="submit">Submit All</button>
-  </div>
-
+          <button type="submit">Submit All</button>
+        </div>
       </form>
 
       <hr />
@@ -95,34 +118,57 @@ const StudentPage = () => {
       {docs.length === 0 ? (
         <p>No documents submitted yet.</p>
       ) : (
-        docs.map((doc) => (
-          <div key={doc._id} className="card">
-            <h4>{doc.title}</h4>
-            <a href={doc.fileUrl} target="_blank" rel="noreferrer">
-              View Document
-            </a>
-            <ul>
-              <li>Guide: {getStatusText(doc.status.guide)}</li>
-              <li>Panel Coordinator: {getStatusText(doc.status.panelCoordinator)}</li>
-              <li>Panel: {getStatusText(doc.status.panel)}</li>
-            </ul>
-            
-            {doc.finalStatus === "Approved" && (
-              <>
-                {doc.marks !== undefined && (
-                  <p><strong>Total Marks:</strong> {doc.marks}</p>
-                )}
-                {doc.status.panel.marks !== undefined && (
-                  <p><strong>Panel Marks:</strong> {doc.status.panel.marks}</p>
-                )}
-              </>
-            )}
+        docs.map((doc) => {
+          const guideStatus = doc.status?.guide;
+          const guideHasReviewed =
+            guideStatus?.approved || guideStatus?.rejected;
 
-            <p>
-              <strong>Final Status:</strong> {doc.finalStatus}
-            </p>
-          </div>
-        ))
+          return (
+            <div key={doc._id} className="card">
+              <h4>{doc.title}</h4>
+              <a href={doc.fileUrl} target="_blank" rel="noreferrer">
+                View Document
+              </a>
+              <ul>
+                <li>Guide: {getStatusText(doc.status.guide)}</li>
+                <li>
+                  Panel Coordinator:{" "}
+                  {getStatusText(doc.status.panelCoordinator)}
+                </li>
+                <li>Panel: {getStatusText(doc.status.panel)}</li>
+              </ul>
+
+              {doc.finalStatus === "Approved" && (
+                <>
+                  {doc.marks !== undefined && (
+                    <p>
+                      <strong>Total Marks:</strong> {doc.marks}
+                    </p>
+                  )}
+                  {doc.status.panel.marks !== undefined && (
+                    <p>
+                      <strong>Panel Marks:</strong>{" "}
+                      {doc.status.panel.marks}
+                    </p>
+                  )}
+                </>
+              )}
+
+              <p>
+                <strong>Final Status:</strong> {doc.finalStatus}
+              </p>
+
+              {!guideHasReviewed && (
+                <button
+                  onClick={() => handleDelete(doc._id)}
+                  className="delete-btn"
+                >
+                  <FaTrash /> Delete
+                </button>
+              )}
+            </div>
+          );
+        })
       )}
     </div>
   );

@@ -1,28 +1,20 @@
-import express from 'express';
-import { exec } from 'child_process';
+const { exec } = require("child_process");
 
-const app = express();
-app.use(express.json());
+exec(`
+  docker pull nihamo/crassist-frontend:latest &&
+  docker pull nihamo/crassist-backend:latest &&
 
-const TOKEN = 'abc123'; // optional
+  docker stop frontend-container || true &&
+  docker rm frontend-container || true &&
+  docker run -d --name frontend-container -p 5173:5173 nihamo/crassist-frontend:latest &&
 
-app.post('/webhook', (req, res) => {
-  const token = req.query.token;
-  if (token !== TOKEN) {
-    return res.status(403).send('Invalid token');
+  docker stop backend-container || true &&
+  docker rm backend-container || true &&
+  docker run -d --name backend-container -p 5000:5000 nihamo/crassist-backend:latest
+`, (err, stdout, stderr) => {
+  if (err) {
+    console.error("Deployment failed:", stderr);
+  } else {
+    console.log("Deployment successful:\n", stdout);
   }
-
-  // Pull latest image and restart container
-  exec('docker pull yourdockerhubusername/frontend-app && docker stop my-app && docker rm my-app && docker run -d --name my-app -p 3000:3000 yourdockerhubusername/frontend-app', 
-  (err, stdout, stderr) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).send('Error updating');
-    }
-    res.send('Updated!');
-  });
-});
-
-app.listen(9000, () => {
-  console.log('Webhook server listening on port 9000');
 });

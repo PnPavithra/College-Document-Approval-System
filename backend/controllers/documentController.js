@@ -477,8 +477,6 @@ const deleteDocument = async (req, res, next) => {
 };
 
 
-
-
 module.exports = {
   submitDocument,
   approveDocument,
