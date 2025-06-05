@@ -38,7 +38,7 @@ jobs:
       - name: 🧪 Run backend tests
         working-directory: ./backend
         env:
-            MONGO_URL: mongodb://localhost:27017/testdb
+          MONGO_URL: mongodb://localhost:27017/testdb
         run: npm test || true
 
       - name: 📦 Install frontend dependencies
@@ -83,11 +83,10 @@ jobs:
       - name: 🔐 Install Snyk
         run: npm install -g snyk
 
-      - name: 🔐 Authenticate Snyk
-        run: snyk auth ${{ secrets.SNYK_TOKEN }}
-
       - name: 🔎 Snyk Test Backend
         working-directory: ./backend
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: |
           npm install
           snyk test
@@ -95,6 +94,8 @@ jobs:
 
       - name: 🔎 Snyk Test Frontend
         working-directory: ./frontend
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: |
           npm install
           snyk test
@@ -104,6 +105,7 @@ jobs:
     name: 🐳 Build & Push Docker Images
     runs-on: ubuntu-latest
     needs: [build-and-test, sonarcloud, snyk]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
       - name: 📥 Checkout code
@@ -126,10 +128,14 @@ jobs:
       - name: 🚀 Push Frontend Docker image
         run: docker push ${{ secrets.DOCKER_USERNAME }}/crassist-frontend:latest
 
-      # ✅ NEW: Trigger Render backend deployment
       - name: 🔄 Trigger Render Backend Deploy
-        run: curl "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+        env:
+          RENDER_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        if: env.RENDER_URL != ''
+        run: curl "$RENDER_URL"
 
-      # ✅ NEW: Trigger Netlify frontend deployment
       - name: 🔄 Trigger Netlify Frontend Deploy
-        run: curl -X POST -d '{}' ${{ secrets.NETLIFY_DEPLOY_HOOK_URL }}
+        env:
+          NETLIFY_URL: ${{ secrets.NETLIFY_DEPLOY_HOOK_URL }}
+        if: env.NETLIFY_URL != ''
+        run: curl -X POST -d '{}' "$NETLIFY_URL"
