@@ -125,17 +125,35 @@ const StudentPage = () => {
 
           return (
             <div key={doc._id} className="card">
-              <h4>{doc.title}</h4>
-              <a href={doc.fileUrl} target="_blank" rel="noreferrer">
-                View Document
-              </a>
+            <h4>{doc.title}</h4>
+            <a href={doc.fileUrl} target="_blank" rel="noreferrer">
+              View Document
+            </a>
               <ul>
-                <li>Guide: {getStatusText(doc.status.guide)}</li>
                 <li>
-                  Panel Coordinator:{" "}
-                  {getStatusText(doc.status.panelCoordinator)}
+                  Guide: {getStatusText(doc.status.guide)}
+                  {doc.status?.guide?.comment && (
+                    <div style={{ marginLeft: "1rem" }}>
+                      <strong>Guide's Comment:</strong> {doc.status.guide.comment}
+                    </div>
+                  )}
                 </li>
-                <li>Panel: {getStatusText(doc.status.panel)}</li>
+                <li>
+                  Panel Coordinator: {getStatusText(doc.status.panelCoordinator)}
+                  {doc.status?.panelCoordinator?.comment && (
+                    <div style={{ marginLeft: "1rem" }}>
+                      <strong>Panel Coordinator's Comment:</strong> {doc.status.panelCoordinator.comment}
+                    </div>
+                  )}
+                </li>
+                <li>
+                  Panel: {getStatusText(doc.status.panel)}
+                  {doc.status?.panel?.comment && (
+                    <div style={{ marginLeft: "1rem" }}>
+                      <strong>Panel's Comment:</strong> {doc.status.panel.comment}
+                    </div>
+                  )}
+                </li>
               </ul>
 
               {doc.finalStatus === "Approved" && (
@@ -147,26 +165,26 @@ const StudentPage = () => {
                   )}
                   {doc.status.panel.marks !== undefined && (
                     <p>
-                      <strong>Panel Marks:</strong>{" "}
-                      {doc.status.panel.marks}
+                      <strong>Panel Marks:</strong> {doc.status.panel.marks}
                     </p>
                   )}
                 </>
               )}
 
-              <p>
-                <strong>Final Status:</strong> {doc.finalStatus}
-              </p>
+          <p>
+            <strong>Final Status:</strong> {doc.finalStatus}
+          </p>
 
-              {!guideHasReviewed && (
-                <button
-                  onClick={() => handleDelete(doc._id)}
-                  className="delete-btn"
-                >
-                  <FaTrash /> Delete
-                </button>
-              )}
-            </div>
+          {!guideHasReviewed && (
+            <button
+              onClick={() => handleDelete(doc._id)}
+              className="delete-btn"
+            >
+              <FaTrash /> Delete
+            </button>
+          )}
+        </div>
+
           );
         })
       )}

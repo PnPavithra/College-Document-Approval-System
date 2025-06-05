@@ -52,6 +52,9 @@ return (
           View File
         </a>
         <br />
+        {doc.status?.guide?.comment && (
+            <p><strong>Guide Comment:</strong> {doc.status.guide.comment}</p>
+        )}
         <input
           placeholder="Add a comment"
           value={comments[doc._id] || ""}
