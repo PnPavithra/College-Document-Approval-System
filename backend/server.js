@@ -25,7 +25,7 @@ app.get('/health', (req, res) => {
 // Use the custom Prometheus middleware to track metrics on all routes
 app.use(metricsMiddleware);
 
-// /metrics endpoint for Prometheus to scrape
+// /metrics endpoint for Prometheus to scrap
 app.get('/metrics', metricsEndpoint);
 
 // Routes
