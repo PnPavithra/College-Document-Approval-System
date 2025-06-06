@@ -9,7 +9,8 @@ const {
   getStudentDocuments,
   getPendingDocumentsForApprover,
   getPanelMarksByStudent,
-  deleteDocument
+  deleteDocument,
+  updateSubmittedDocument
 } = require("../controllers/documentController");
 
 // Student submits a document
@@ -59,4 +60,11 @@ router.delete(
   authorizeRoles("Student"),
   deleteDocument
 );
+
+//students update their documents if not reviewed by guide
+router.patch(
+  "/update/:id", 
+  protect, 
+  updateSubmittedDocument);
+
 module.exports = router;

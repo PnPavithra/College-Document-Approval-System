@@ -9,7 +9,7 @@ const GuideDocument = () => {
     const fetchGuide = async () => {
       try {
         const res = await API.get("/guides");
-        console.log("Guide response:", res.data); // 👈 Add this
+        console.log("Guide response:", res.data);
         setGuideUrl(res.data.url || "");
       } catch (err) {
         console.error("Failed to fetch guide document", err);

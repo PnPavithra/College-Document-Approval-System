@@ -9,6 +9,8 @@ import { FaPlus, FaTrash } from "react-icons/fa";
 const StudentPage = () => {
   const [docs, setDocs] = useState([]);
   const [formFields, setFormFields] = useState([{ title: "", fileUrl: "" }]);
+  const [editDocId, setEditDocId] = useState(null);
+  const [editFields, setEditFields] = useState({ title: "", fileUrl: "" });
 
   const fetchDocs = async () => {
     try {
@@ -56,6 +58,36 @@ const StudentPage = () => {
       fetchDocs();
     } catch (err) {
       alert(err.response?.data?.message || "Failed to delete document");
+    }
+  };
+
+  const startEditing = (doc) => {
+    setEditDocId(doc._id);
+    setEditFields({ title: doc.title, fileUrl: doc.fileUrl });
+  };
+
+  const handleEditChange = (field, value) => {
+    setEditFields((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleUpdate = async (id) => {
+    try {
+      const token = localStorage.getItem("token");
+      await fetch(`http://localhost:5000/api/documents/update/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(editFields),
+      });
+
+      setEditDocId(null);
+      setEditFields({ title: "", fileUrl: "" });
+      fetchDocs();
+      alert("Document updated successfully!");
+    } catch (err) {
+      alert(err.message || "Update failed");
     }
   };
 
@@ -125,10 +157,10 @@ const StudentPage = () => {
 
           return (
             <div key={doc._id} className="card">
-            <h4>{doc.title}</h4>
-            <a href={doc.fileUrl} target="_blank" rel="noreferrer">
-              View Document
-            </a>
+              <h4>{doc.title}</h4>
+              <a href={doc.fileUrl} target="_blank" rel="noreferrer">
+                View Document
+              </a>
               <ul>
                 <li>
                   Guide: {getStatusText(doc.status.guide)}
@@ -171,20 +203,54 @@ const StudentPage = () => {
                 </>
               )}
 
-          <p>
-            <strong>Final Status:</strong> {doc.finalStatus}
-          </p>
+              <p>
+                <strong>Final Status:</strong> {doc.finalStatus}
+              </p>
 
-          {!guideHasReviewed && (
-            <button
-              onClick={() => handleDelete(doc._id)}
-              className="delete-btn"
-            >
-              <FaTrash /> Delete
-            </button>
-          )}
-        </div>
+              {!guideHasReviewed && (
+                <>
+                  <button
+                    onClick={() => handleDelete(doc._id)}
+                    className="delete-btn"
+                  >
+                    <FaTrash /> Delete
+                  </button>
 
+                  <button
+                    onClick={() => startEditing(doc)}
+                    className="edit-btn"
+                    style={{ marginLeft: "0.5rem" }}
+                  >
+                    ✏️ Update
+                  </button>
+                </>
+              )}
+
+              {editDocId === doc._id && (
+                <div className="edit-form" style={{ marginTop: "1rem" }}>
+                  <input
+                    type="text"
+                    placeholder="Updated Title"
+                    value={editFields.title}
+                    onChange={(e) =>
+                      handleEditChange("title", e.target.value)
+                    }
+                  />
+                  <input
+                    type="text"
+                    placeholder="Updated File URL"
+                    value={editFields.fileUrl}
+                    onChange={(e) =>
+                      handleEditChange("fileUrl", e.target.value)
+                    }
+                  />
+                  <button onClick={() => handleUpdate(doc._id)}>
+                    Save Changes
+                  </button>
+                  <button onClick={() => setEditDocId(null)}>Cancel</button>
+                </div>
+              )}
+            </div>
           );
         })
       )}

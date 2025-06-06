@@ -476,6 +476,39 @@ const deleteDocument = async (req, res, next) => {
   }
 };
 
+const updateSubmittedDocument = async (req, res) => {
+  const { id } = req.params;
+  const { title, fileUrl } = req.body;
+  const userId = req.user.userId;
+
+  try {
+    const doc = await Document.findById(id);
+    if (!doc) return res.status(404).json({ msg: "Document not found" });
+
+    if (doc.submittedBy.toString() !== userId)
+      return res.status(403).json({ msg: "Unauthorized" });
+
+    // Don't allow updates after review starts
+    const { guide, panelCoordinator, panel } = doc.status;
+    if (
+      guide.approved || guide.rejected ||
+      panelCoordinator.approved || panelCoordinator.rejected ||
+      panel.approved || panel.rejected
+    ) {
+      return res.status(400).json({ msg: "Cannot update document after review starts" });
+    }
+
+    if (title) doc.title = title;
+    if (fileUrl) doc.fileUrl = fileUrl;
+
+    await doc.save();
+    res.json({ msg: "Document updated successfully", document: doc });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: "Server error" });
+  }
+};
+
 
 module.exports = {
   submitDocument,
@@ -483,7 +516,8 @@ module.exports = {
   getStudentDocuments,
   getPendingDocumentsForApprover,
   getPanelMarksByStudent,
-  deleteDocument
+  deleteDocument,
+  updateSubmittedDocument
 };
 
 
