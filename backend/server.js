@@ -49,7 +49,8 @@ const allowedOrigins = [
   "https://college-document-approval-system.netlify.app/" // replace this with your actual frontend Netlify URL
 ];
 
-app.use(cors({
-  origin: allowedOrigins,
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: "*",
+  })
+);
