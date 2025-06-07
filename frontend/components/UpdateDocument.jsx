@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import API from "../api/api"; // Add at the top
 
 function UpdateDocument({ documentId, token, onUpdateSuccess }) {
   const [title, setTitle] = useState("");
@@ -10,12 +11,14 @@ function UpdateDocument({ documentId, token, onUpdateSuccess }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    setLoading(true);
+    setLoading(true)
+
 
     try {
-      const response = await axios.patch(
-        `http://localhost:5000/api/documents/update/${documentId}`,
-        { title, fileUrl },
+      const response = await API.patch(`/documents/update/${documentId}`, {
+        title,
+        fileUrl
+       },
         {
           headers: {
             Authorization: `Bearer ${token}`,

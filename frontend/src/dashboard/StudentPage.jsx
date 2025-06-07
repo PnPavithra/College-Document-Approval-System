@@ -5,6 +5,7 @@ import {
   deleteDocument,
 } from "../api/documents";
 import { FaPlus, FaTrash } from "react-icons/fa";
+import API from "../api/api";
 
 const StudentPage = () => {
   const [docs, setDocs] = useState([]);
@@ -73,14 +74,7 @@ const StudentPage = () => {
   const handleUpdate = async (id) => {
     try {
       const token = localStorage.getItem("token");
-      await fetch(`http://localhost:5000/api/documents/update/${id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(editFields),
-      });
+      await API.patch(`/documents/update/${id}`, editFields);
 
       setEditDocId(null);
       setEditFields({ title: "", fileUrl: "" });

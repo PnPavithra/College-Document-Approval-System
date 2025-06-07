@@ -1,6 +1,4 @@
-// api/guides.js
-import axios from "axios";
+// src/api/guides.js
+import API from "./api";
 
-export const getGuideDocument = () => {
-  return axios.get("http://localhost:5000/api/guides");
-};
+export const getGuideDocument = () => API.get("/guides");

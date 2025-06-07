@@ -1,11 +1,5 @@
 // src/api/documents.js
 import API from './api.js';
-import axios from "axios";
-
-const axiosInstance = axios.create({
-  baseURL: "http://localhost:5000/api",
-});
-
 
 // Submit new document (Student)
 export const submitDocument = (data) => API.post('/documents/submit', data);

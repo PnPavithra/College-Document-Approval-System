@@ -44,3 +44,12 @@ mongoose.connect(process.env.MONGO_URI)
   })
   .catch((err) => console.error("❌ MongoDB connection error:", err));
   
+const allowedOrigins = [
+  "http://localhost:5173", // dev
+  "https://college-document-approval-system.netlify.app/" // replace this with your actual frontend Netlify URL
+];
+
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true
+}));
