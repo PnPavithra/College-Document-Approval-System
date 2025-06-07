@@ -57,7 +57,7 @@ const Login = () => {
 
   return (
     <div className="container">
-      <h2>Login</h2>
+      <h2>New Login</h2>
       <form onSubmit={handleSubmit}>
         <label>Name:</label>
         <input name="name" value={form.name} onChange={handleChange} required />
