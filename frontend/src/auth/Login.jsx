@@ -27,7 +27,7 @@ const Login = () => {
         role: form.role,
       };
 
-      const res = await API.post("/auth/login", body);
+      const res = await API.post("/api/auth/login", body);
       const { token } = res.data;
 
       localStorage.setItem("token", res.data.token);
