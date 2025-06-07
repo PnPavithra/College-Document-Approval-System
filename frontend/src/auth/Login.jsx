@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import API from "/src/api/api.js";
 import GuideDocument from "../../components/GuideDocument.jsx";
 
 const Login = () => {
@@ -27,10 +26,21 @@ const Login = () => {
         role: form.role,
       };
 
-      const res = await API.post("/auth/login", body);
-      const { token } = res.data;
+      const response = await fetch("https://college-document-approval-system.onrender.com/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      });
 
-      localStorage.setItem("token", res.data.token);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.msg || "Login failed");
+      }
+
+      const data = await response.json();
+      localStorage.setItem("token", data.token);
       localStorage.setItem("role", form.role);
       localStorage.setItem("name", form.name);
 
@@ -51,13 +61,13 @@ const Login = () => {
           navigate("/");
       }
     } catch (err) {
-      alert(err.response?.data?.msg || "Login failed");
+      alert(err.message || "Login failed");
     }
   };
 
   return (
     <div className="container">
-      <h2>New Login</h2>
+      <h2>Login</h2>
       <form onSubmit={handleSubmit}>
         <label>Name:</label>
         <input name="name" value={form.name} onChange={handleChange} required />
@@ -73,7 +83,6 @@ const Login = () => {
           <option>Panel</option>
         </select>
 
-        {/* Optional Guide Name (just display) */}
         {form.role === "Student" && (
           <div>
             <label>Guide Name (for your reference):</label>
@@ -85,7 +94,7 @@ const Login = () => {
         <p>
           Not registered? <a href="/register">Register here</a>
         </p>
-        
+
         <GuideDocument />
       </form>
     </div>
